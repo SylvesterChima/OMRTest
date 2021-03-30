@@ -32,7 +32,43 @@ namespace OMRTest
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            ProcessAttendanceFiles();
+        }
 
+        private int UpdateStatusPanel(int total, bool justProcessedFile, string MessageToShow)
+        {
+            int retval = total;
+            try
+            {
+                PrimaryTotal.Text = total.ToString();
+                if (PrimaryTotal.Text == String.Empty || PrimaryTotal.Text == "0")
+                    PrimaryTotal.Text = total.ToString();
+                else
+                    retval = Convert.ToInt32(PrimaryTotal.Text);
+
+                if (justProcessedFile)
+                {
+                    //increase the rows processed number
+                    PrimaryValue.Text = ((int)Convert.ToInt32(PrimaryValue.Text) + 1).ToString();
+                    if (retval > 0) { PrimaryPercent.Text = ((Convert.ToInt32(PrimaryValue.Text) * 100) / retval).ToString(); }
+                    double percentcomplete = Convert.ToDouble(PrimaryPercent.Text);
+                    percentcomplete = percentcomplete * 4;
+                    //ProgressBarImage.Width = System.Web.UI.WebControls.Unit.Pixel(Convert.ToInt32(System.Math.Floor(percentcomplete)));
+                }
+
+                CurrentOperation.Text = MessageToShow;
+
+                if (PrimaryTotal.Text == PrimaryValue.Text)
+                {
+                    CurrentOperation.Text = "Process Finished!";
+                }
+            }
+            catch
+            {
+                // we throw away this error because it is not important.  This is just showing the user the process.
+            }
+
+            return retval;
         }
         public void ProcessAttendanceFiles()
         {
@@ -50,7 +86,7 @@ namespace OMRTest
                 {
                      int total = UpdateStatusPanel(fi.Length, false, "Processing...");
 
-                    ProgressBarImage.Width = System.Web.UI.WebControls.Unit.Pixel(0);
+                    //ProgressBarImage.Width = System.Web.UI.WebControls.Unit.Pixel(0);
 
                     ImGearEvaluationManager.Mode = ImGearEvaluationMode.Watermark;
                     ImGearEvaluationManager.Initialize();
@@ -64,13 +100,13 @@ namespace OMRTest
                     }
                     foreach (FileInfo attendanceFile in fi)
                     {
-                        log.Info(attendanceFile.Name);
+                        //log.Info(attendanceFile.Name);
                         //make sure webparts have admin valid user
-                        if (user == null)
-                        {
-                            user = iMISAddins.Class.Security.ReAuthiMISUser(Membership.GetUser().UserName);
-                            Session["LoginUser"] = user;
-                        }
+                        //if (user == null)
+                        //{
+                        //    user = iMISAddins.Class.Security.ReAuthiMISUser(Membership.GetUser().UserName);
+                        //    Session["LoginUser"] = user;
+                        //}
 
 
                         // process the input file
@@ -95,7 +131,7 @@ namespace OMRTest
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+                //log.Error(ex);
             }
         }
 
@@ -111,7 +147,7 @@ namespace OMRTest
             StringBuilder sbIdsInAttendance = new StringBuilder();
             bool DidFileSuccessfullyProcess = true;
             int rowcount = 0;
-            log.Info("File content needs to be open");
+            //log.Info("File content needs to be open");
             // Open the input file
             using (FileStream content = attendanceFile.OpenRead())
             {
@@ -136,7 +172,7 @@ namespace OMRTest
                     page = tempDocument.Pages[0]; //ImGearFileFormats.LoadPage(content, 0);
 
                     // load the recognition engine
-                    rec = new ImGearRecognition(ConfigurationManager.AppSettings["RecognitionSourcePath"].ToString());
+                    rec = new ImGearRecognition("C:\\Users\\Dev10\\Source\\Repos\\OMRTest\\OMRTest\\bin\\Debug");
 
                     #endregion
 
@@ -169,8 +205,8 @@ namespace OMRTest
                     recPage.Image.Despeckle();
 
                     // load the zones
-                    recPage.Zones.LoadFromFile(ConfigurationManager.AppSettings["AttendanceRoot"].ToString() + "\\zones\\ocra.zon");
-                    log.Info("ImageGear: start implementation");
+                    recPage.Zones.LoadFromFile("C:\\AttendanceRoot" + "\\zones\\ocra.zon");
+                    //log.Info("ImageGear: start implementation");
                     // Perform recognition, appending to the recognized data file
                     recPage.Recognize();
 
@@ -197,9 +233,9 @@ namespace OMRTest
                                 //Define the new zone to be 100 pixels wide and 50 pixel hi from the top right edge of the barcode.
                                 // Sometimes the x axis paratmer is a little off ,so we will use a certain number for the left parameter.
                                 // The y parameter is the one we really care about.
-                                int boxWidth = Convert.ToInt32(ConfigurationManager.AppSettings["AttendanceBoxWidth"]);
-                                int topOffset = Convert.ToInt32(ConfigurationManager.AppSettings["AttendanceTopOffset"]);
-                                int boxHeight = Convert.ToInt32(ConfigurationManager.AppSettings["AttendanceBoxHeight"]);
+                                int boxWidth = 78;
+                                int topOffset = 20;
+                                int boxHeight = 68;
 
                                 int goleft = 0;
 
@@ -209,7 +245,7 @@ namespace OMRTest
                                     {
                                         rowcount++;
                                     }
-                                    goleft = Convert.ToInt32(ConfigurationManager.AppSettings["AttendanceBoxColumn1Left"]);
+                                    goleft = 935;
                                     goleft = letter.Rect.Right - goleft;
 
                                     // we need to make sure the box is on the page.
@@ -217,7 +253,7 @@ namespace OMRTest
                                 }
                                 else if (letter.ZoneIndex == 3)
                                 {
-                                    goleft = Convert.ToInt32(ConfigurationManager.AppSettings["AttendanceBoxColumn2Left"]);
+                                    goleft = 935;
                                     goleft = letter.Rect.Right - goleft;
                                 }
                                 //imGearRecZone.Rect = new ImGearRectangle(goleft, letter.Rect.Top - topOffset, boxWidth, boxHeight);
@@ -310,7 +346,7 @@ namespace OMRTest
                             }
                         }
                     }
-                    log.Info("ImageGer: load all person Ids in the image");
+                    //log.Info("ImageGer: load all person Ids in the image");
                     // make sure we have a date and a roster number or throw
                     if (!(RosterNum.HasValue)) { throw new ApplicationException("No Roster Number picked up on: " + attendanceFile.Name); }
                     if (!(attDate.HasValue)) { throw new ApplicationException("No Date picked up on: " + attendanceFile.Name); }
@@ -318,12 +354,12 @@ namespace OMRTest
                     if (RosterMeetingId == 0) { RosterMeetingId = null; }
                     if (GroupId == 0) { GroupId = null; }
                     if (GroupMeetingId == 0) { GroupMeetingId = null; }
-                    log.Info("ImageGear: end implementation");
+                    //log.Info("ImageGear: end implementation");
                     ArrayList alIMISIdsInAttendance = new ArrayList();
                     recPage.Dispose();
                     #region OMR Implementation
 
-                    log.Info("FormFix: OMR initialize");
+                    //log.Info("FormFix: OMR initialize");
                     string OMRResultsStringForEmail = "<br><br>Results:<br>Id - Value - (Confidence)<br>";
                     try
                     {
@@ -338,7 +374,7 @@ namespace OMRTest
                             firstIDs = alPersonIds;
                             secondIDs = new ArrayList();
                         }
-                        log.Info(attendanceFile.Name + " - rowcount is " + rowcount);
+                        //log.Info(attendanceFile.Name + " - rowcount is " + rowcount);
 
                         var rectF = new RectangleF[(alPersonIds.Count > rowcount) ? 2 : 1];
                         var rate = 2626 / 22; var height = rate * rowcount;
@@ -367,7 +403,7 @@ namespace OMRTest
                         engine.sBound = new Size(_img.Width, _img.Height);
                         engine.attendances = IDs;
                         var omrResult = engine.StartProcessOMR();
-                        log.Warn("Attended Record is " + omrResult.Count);
+                        //log.Warn("Attended Record is " + omrResult.Count);
                         if (omrResult.Count == 0)
                         {
                             rectF = new RectangleF[(alPersonIds.Count > rowcount) ? 2 : 1];
@@ -389,8 +425,8 @@ namespace OMRTest
 
 
 
-                        log.Info(OMRResultsStringForEmail.Replace("<br>", ""));
-                        log.Info("OMR: end implementation");
+                        //log.Info(OMRResultsStringForEmail.Replace("<br>", ""));
+                        //log.Info("OMR: end implementation");
 
                     }
                     catch (Exception ex)
@@ -406,19 +442,19 @@ namespace OMRTest
                         //We need to get the meeting time based on the rostermeetingid or the groupmeetingid
                         if (RosterMeetingId.HasValue)
                         {
-                            Roster.RosterMeeting rm = Roster.RosterMeeting.FromID(RosterMeetingId.Value);
-                            if (rm != null)
-                            {
-                                attDate = Convert.ToDateTime(attDate.Value.ToShortDateString() + " " + rm.Time);
-                            }
+                            //Roster.RosterMeeting rm = Roster.RosterMeeting.FromID(RosterMeetingId.Value);
+                            //if (rm != null)
+                            //{
+                            //    attDate = Convert.ToDateTime(attDate.Value.ToShortDateString() + " " + rm.Time);
+                            //}
                         }
                         else if (GroupMeetingId.HasValue)
                         {
-                            GroupMeeting gm = GroupMeeting.FromID(GroupMeetingId.Value);
-                            if (gm != null)
-                            {
-                                attDate = Convert.ToDateTime(attDate.Value.ToShortDateString() + " " + gm.Time);
-                            }
+                            //GroupMeeting gm = GroupMeeting.FromID(GroupMeetingId.Value);
+                            //if (gm != null)
+                            //{
+                            //    attDate = Convert.ToDateTime(attDate.Value.ToShortDateString() + " " + gm.Time);
+                            //}
                         }
 
                         //Now cruise through array of those there to save the data.                   
@@ -432,73 +468,73 @@ namespace OMRTest
                             sbIdsInAttendance.Append(iMISId + ", ");
                             try
                             {
-                                Roster.RosterMemberAttendance.AddAttendance(iMISId, RosterNum.Value, attDate.Value, GroupId, RosterMeetingId, GroupMeetingId, (CStaffUser)user);
+                                //Roster.RosterMemberAttendance.AddAttendance(iMISId, RosterNum.Value, attDate.Value, GroupId, RosterMeetingId, GroupMeetingId, (CStaffUser)user);
                                 //log.Info($"Roster Attendance: {iMISId} attended roster {RosterNum.Value} on {attDate.Value}");
                             }
                             catch (Exception ex)
                             {
-                                log.Warn($"Invalid imis ID {iMISId} for roster {RosterNum.Value} on {attDate.Value}");
+                                //log.Warn($"Invalid imis ID {iMISId} for roster {RosterNum.Value} on {attDate.Value}");
                             }
                         }
-                        log.Warn("Roster Attendance: Completed");
+                        //log.Warn("Roster Attendance: Completed");
                     }
 
                     #region Email Confirmation File to user.
                     // Putting something in this label field turns off the emailing.
-                    if (emailmsg.Text == String.Empty)
-                    {
-                        // remove the end comma on our string length
-                        string s = String.Empty;
-                        if (sbIdsInAttendance.Length >= 2)
-                        {
-                            s = "The following iMIS ids attended: ";
-                            s += sbIdsInAttendance.Remove(sbIdsInAttendance.Length - 2, 2).ToString();
-                            s += OMRResultsStringForEmail;
-                        }
+                    //if (emailmsg.Text == String.Empty)
+                    //{
+                    //    // remove the end comma on our string length
+                    //    string s = String.Empty;
+                    //    if (sbIdsInAttendance.Length >= 2)
+                    //    {
+                    //        s = "The following iMIS ids attended: ";
+                    //        s += sbIdsInAttendance.Remove(sbIdsInAttendance.Length - 2, 2).ToString();
+                    //        s += OMRResultsStringForEmail;
+                    //    }
 
-                        if (RosterNum.HasValue) { s = s + "<br><br>Roster Num: " + RosterNum.Value.ToString(); }
-                        if (attDate.HasValue) { s = s + "<br>Date: " + attDate.Value.ToShortDateString() + " " + attDate.Value.ToShortTimeString(); }
-                        if (RosterMeetingId.HasValue) { s = s + "<br>Roster Meeting: " + RosterMeetingId.Value.ToString(); }
-                        if (GroupId.HasValue) { s = s + "<br>GroupId: " + GroupId.ToString(); }
-                        if (GroupMeetingId.HasValue) { s = s + "<br>GroupMeetingId: " + GroupMeetingId.ToString(); }
+                    //    if (RosterNum.HasValue) { s = s + "<br><br>Roster Num: " + RosterNum.Value.ToString(); }
+                    //    if (attDate.HasValue) { s = s + "<br>Date: " + attDate.Value.ToShortDateString() + " " + attDate.Value.ToShortTimeString(); }
+                    //    if (RosterMeetingId.HasValue) { s = s + "<br>Roster Meeting: " + RosterMeetingId.Value.ToString(); }
+                    //    if (GroupId.HasValue) { s = s + "<br>GroupId: " + GroupId.ToString(); }
+                    //    if (GroupMeetingId.HasValue) { s = s + "<br>GroupMeetingId: " + GroupMeetingId.ToString(); }
 
-                        var apiKey = ConfigurationManager.AppSettings["SGApiKey"];
-                        var client = new SendGridClient(apiKey);
-                        var email = ((CStaffUser)user).UserId + "@second.org";
-                        var from = new EmailAddress(email, ((CStaffUser)user).UserName);
-                        var to = new EmailAddress(email);
-                        var sendGridMsg = MailHelper.CreateSingleEmail(from, to, "Attendance Confirmation", null, "<html><body>" + s + "</body></html>");
-                        byte[] byteData = Encoding.ASCII.GetBytes(File.ReadAllText(attendanceFile.FullName));
-                        sendGridMsg.AddAttachment(new SendGrid.Helpers.Mail.Attachment
-                        {
-                            Content = Convert.ToBase64String(byteData),
-                            Disposition = "attachment",
-                            Filename = attendanceFile.Name,
-                            Type = MimeMapping.GetMimeMapping(attendanceFile.Name)
-                        });
-                        var response = client.SendEmailAsync(sendGridMsg).Result;
+                    //    var apiKey = ConfigurationManager.AppSettings["SGApiKey"];
+                    //    var client = new SendGridClient(apiKey);
+                    //    var email = ((CStaffUser)user).UserId + "@second.org";
+                    //    var from = new EmailAddress(email, ((CStaffUser)user).UserName);
+                    //    var to = new EmailAddress(email);
+                    //    var sendGridMsg = MailHelper.CreateSingleEmail(from, to, "Attendance Confirmation", null, "<html><body>" + s + "</body></html>");
+                    //    byte[] byteData = Encoding.ASCII.GetBytes(File.ReadAllText(attendanceFile.FullName));
+                    //    sendGridMsg.AddAttachment(new SendGrid.Helpers.Mail.Attachment
+                    //    {
+                    //        Content = Convert.ToBase64String(byteData),
+                    //        Disposition = "attachment",
+                    //        Filename = attendanceFile.Name,
+                    //        Type = MimeMapping.GetMimeMapping(attendanceFile.Name)
+                    //    });
+                    //    var response = client.SendEmailAsync(sendGridMsg).Result;
 
-                        // if it is zero we only email the first file processed to the person running the app.
-                        // we will put in a string to make this code not execute again.
-                        if (ConfigurationManager.AppSettings["EmailSummaries"].ToString() == "0")
+                    //    // if it is zero we only email the first file processed to the person running the app.
+                    //    // we will put in a string to make this code not execute again.
+                    //    if (ConfigurationManager.AppSettings["EmailSummaries"].ToString() == "0")
 
-                            emailmsg.Text = "Emailed Confirmation File.";
-                    }
+                    //        emailmsg.Text = "Emailed Confirmation File.";
+                    //}
                     #endregion
                 }
                 catch (Exception ex)
                 {
                     DidFileSuccessfullyProcess = false;
-                    log.Error(ex);
+                    //log.Error(ex);
                     // update the unreadable files label
                     if (UnreadableFiles.Text == String.Empty) { UnreadableFiles.Text = "0"; }
                     UnreadableFiles.Text = ((int)Convert.ToInt32(UnreadableFiles.Text) + 1).ToString();
 
                     // we either continue processign or show the error depending on our run mode
-                    if (ConfigurationManager.AppSettings["StopOnError"].ToString() == "1")
-                    {
-                        throw;
-                    }
+                    //if (ConfigurationManager.AppSettings["StopOnError"].ToString() == "1")
+                    //{
+                    //    throw;
+                    //}
                 }
                 finally
                 {
@@ -519,9 +555,9 @@ namespace OMRTest
                 string newloc = "";
 
                 if (DidFileSuccessfullyProcess)
-                { newloc = ConfigurationManager.AppSettings["AttendanceRoot"].ToString() + "\\Processed\\" + attDate.Value.ToShortDateString().Replace("/", "-") + "\\" + RosterNum.Value.ToString() + "\\"; }
+                { newloc = "C:\\AttendanceRoot" + "\\Processed\\" + attDate.Value.ToShortDateString().Replace("/", "-") + "\\" + RosterNum.Value.ToString() + "\\"; }
                 else
-                { newloc = ConfigurationManager.AppSettings["AttendanceRoot"].ToString() + "\\Errors\\" + System.DateTime.Now.ToShortDateString().Replace("/", "-") + "\\"; }
+                { newloc = "C:\\AttendanceRoot" + "\\Errors\\" + System.DateTime.Now.ToShortDateString().Replace("/", "-") + "\\"; }
 
                 if (!(Directory.Exists(newloc)))
                 {
@@ -531,12 +567,12 @@ namespace OMRTest
             }
             catch (System.Exception ex)
             {
-                log.Error(ex);
+                //log.Error(ex);
                 if (DidFileSuccessfullyProcess)
                 {
                     // since the above failed, just throw it in the processed, failed during move folder                
                     // we won't handle this error so processing will stop because we really can't do anything else.
-                    string newloc = ConfigurationManager.AppSettings["AttendanceRoot"].ToString() + "\\Processed\\FailedDuringFinalMove\\" + attendanceFile.Name;
+                    string newloc = "C:\\AttendanceRoot" + "\\Processed\\FailedDuringFinalMove\\" + attendanceFile.Name;
                     attendanceFile.MoveTo(newloc);
                 }
                 else
