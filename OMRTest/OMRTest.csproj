@@ -65,10 +65,16 @@
     <Reference Include="ImageGear24.Recognition.Forms, Version=24.14.0.719, Culture=neutral, PublicKeyToken=80d669b8b606a2da, processorArchitecture=MSIL">
       <HintPath>..\packages\Accusoft.ImageGear.Recognition.24.14.0\lib\net20\ImageGear24.Recognition.Forms.dll</HintPath>
     </Reference>
-    <Reference Include="OMR">
-      <HintPath>..\..\..\..\Desktop\OMR.dll</HintPath>
+    <Reference Include="IronOcr, Version=2021.2.1.0, Culture=neutral, PublicKeyToken=c2cbcea5ea3f6d8d, processorArchitecture=MSIL">
+      <HintPath>..\packages\IronOcr.2021.2.1\lib\net40\IronOcr.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
+    <Reference Include="OMR">
+      <HintPath>..\..\..\bin\OMR.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -87,10 +93,19 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmIronOCR.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmIronOCR.Designer.cs">
+      <DependentUpon>frmIronOCR.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmIronOCR.resx">
+      <DependentUpon>frmIronOCR.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

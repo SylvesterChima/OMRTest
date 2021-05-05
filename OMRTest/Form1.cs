@@ -582,5 +582,11 @@ namespace OMRTest
             }
             #endregion
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var frm = new frmIronOCR();
+            frm.ShowDialog();
+        }
     }
 }
